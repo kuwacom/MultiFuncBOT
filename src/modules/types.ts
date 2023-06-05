@@ -1,5 +1,4 @@
 import Discord from "discord.js";
-import DiscordVoice from "@discordjs/voice";
 import { config } from "../bot";
 
 export const embedCollar = {
@@ -19,7 +18,8 @@ export interface PollData {
     title: string;
     description: string | null;
     time: number;
-    voters: Voter[] | [];
+    voters: Voter[];
+    contents: string[];
 }
 
 interface SlashCommandOption {
