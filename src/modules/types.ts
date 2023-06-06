@@ -8,9 +8,13 @@ export const embedCollar = {
     error: config.embed.colors.error as Discord.ColorResolvable,
 }
 
+export enum PollState {
+    NotFund = 'notfound'
+}
+
 export interface Voter {
     id: string;
-    answer: [];
+    answer: number[];
 }
 
 export interface PollData {
@@ -18,7 +22,7 @@ export interface PollData {
     title: string;
     description: string | null;
     time: number;
-    voters: Voter[];
+    voters: {[userId: string]: Voter};
     contents: string[];
 }
 

@@ -116,11 +116,12 @@ async function setSlashCommand() {
     logger.info("Global set application Ready!");
 }
 
-async function pollLifeTask() {
-    Object.keys(pollManager.pollData).forEach((key) => {
-        pollManager.pollData[key]
-    });  
-}
+// async function pollLifeTask() {
+//     Object.keys(pollManager.pollData).forEach((key: string) => {
+//         pollManager.pollDatas[key]
+        
+// });
+// }
 
 client.on("ready", async() => {
     logger.info(`Login to Discord with ${client.user?.username}`);
