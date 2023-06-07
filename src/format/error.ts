@@ -4,13 +4,24 @@ import Discord from "discord.js";
 
 // interaction
 export const interaction = {
-    // template一個目のエラー
-    TemplateError: {
+    // エラー
+    ERROR: {
         embeds: [
             new Discord.EmbedBuilder()
             .setColor(Types.embedCollar.error)
             .setTitle(config.emoji.error+"エラー")
-            .setDescription("エラーです")
+            .setDescription("エラーが発生しました！")
+            .setFooter({ text: config.embed.footerText })
+        ],
+        ephemeral: true
+    } as Discord.InteractionReplyOptions,
+
+    NotfoundPoll: {
+        embeds: [
+            new Discord.EmbedBuilder()
+            .setColor(Types.embedCollar.error)
+            .setTitle(config.emoji.error+"ポールが存在しません！")
+            .setDescription("すでにそのポールは終了しているか削除されています")
             .setFooter({ text: config.embed.footerText })
         ],
         ephemeral: true

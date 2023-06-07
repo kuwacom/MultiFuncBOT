@@ -1,7 +1,8 @@
 import { logger, config, client } from "../bot";
-import { sleep } from "../modules/utiles";
+import { autoDeleteMessage, buttons, sleep } from "../modules/utiles";
 import * as pollManager from "../modules/pollManager";
 import * as Types from "../modules/types";
+import * as FormatERROR from "../format/error";
 import Discord from "discord.js";
 
 export const modal = {
@@ -13,12 +14,74 @@ export const executeInteraction = async (interaction: Types.DiscordModalSubmitIn
     const description = interaction.fields.getTextInputValue('description');
     const contents = interaction.fields.getTextInputValue('contents').split(':').filter(content => content.replace(" ", "").replace("　", "") != '');
 
-    let pollData;
-    for (let c = 0; c++; c < 10) {
-        pollData = pollManager.createPoll(title, description, contents);
-        if (pollData != Types.PollState.DuplicateID) continue;
+    let pollData = pollManager.createPoll(title, description, contents);
+    if (pollData == Types.PollState.DuplicateID) {
+        await interaction.reply(FormatERROR.interaction.ERROR);
+        return;
+    }
+    const fields: Discord.EmbedField[] = [
+        {
+            name: 'タイトル',
+            value: title,
+            inline: false
+        }
+    ]
+
+    if (description) {
+        fields.push(
+            {
+                name: '詳細',
+                value: description,
+                inline: false
+            }
+        );
     }
     
+    fields.push(
+        {
+            name: 'アンケート項目',
+            value: '```\n'+
+            contents.join('\n')
+            +'\n```',
+            inline: false
+        }
+    );
+
+    const embed = new Discord.EmbedBuilder()
+	.setColor(Types.embedCollar.info)
+	.setTitle(config.emoji.check + 'ポールの作成')
+	.setDescription('ポールの内容を確認してください\n' +
+    '内容が正しければ **作成** ボタンを押してください\n' +
+    '編集したい場合は **編集** ボタンを押してください')
+    .addFields(fields)
+    .setFooter({ iconURL: interaction.user.avatarURL() as string, text: `${interaction.user.username}#${interaction.user.discriminator}\n` +
+        config.embed.footerText 
+    })
+
+    const createButton = new Discord.ButtonBuilder()
+        .setCustomId('pollCreate:'+pollData.id)
+        .setLabel('作成')
+        // .setEmoji(config.emoji)
+        .setStyle(Discord.ButtonStyle.Success);
+        // .setDisabled(false)
+
+    const editButton = new Discord.ButtonBuilder()
+        .setCustomId('pollEdit:'+pollData.id)
+        .setLabel('編集')
+        // .setEmoji(config.emoji)
+        .setStyle(Discord.ButtonStyle.Primary);
+        // .setDisabled(false)
+
+
+    const buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
+        .addComponents(createButton)
+        .addComponents(editButton);
+
+    interaction.reply({
+        embeds: [ embed ],
+        components: [ buttons ],
+        ephemeral: true
+    });
 
     return;
 }

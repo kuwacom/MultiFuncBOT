@@ -7,7 +7,7 @@ export const button = {
     customId: ["idone", "idsecond"]
 }
 
-export const executeButton = async (interaction: Types.DiscordButtonInteraction) => {
+export const executeInteraction = async (interaction: Types.DiscordButtonInteraction) => {
     /**
      *  -- buttonの設定方法 --
      * 

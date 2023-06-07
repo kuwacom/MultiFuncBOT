@@ -114,7 +114,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             .setFields(betweenFields)
             .setFooter({ iconURL: interaction.user.avatarURL() as string, text: `${interaction.user.username}#${interaction.user.discriminator}\n` +
             config.embed.footerText 
-        })
+            })
     ];
     interaction.reply({ embeds: embeds, components: [ button ], allowedMentions: { repliedUser: false } });
     return;
