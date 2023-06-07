@@ -69,7 +69,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
 
 
     const modal = new Discord.ModalBuilder()
-        .setCustomId('create')
+        .setCustomId('pollCreate')
         .setTitle('ポールの作成');
 
     modal.addComponents(

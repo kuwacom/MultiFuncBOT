@@ -77,10 +77,9 @@ export const addVote = (pollId: number, userId: string, answer: number):Types.Po
 
 export const removeVote = (pollId: number, userId: string, answer: number):Types.PollState | boolean => { // 票の追加
     if (!(pollId in pollDatas)) return Types.PollState.NotFund;
-    if (!pollDatas[pollId].voters[userId]) pollDatas[pollId].voters[userId] = {
-        id: userId,
-        answer: []
-    };
-    pollDatas[pollId].voters[userId].answer.push(answer);
+    var index = pollDatas[pollId].voters[userId].answer.indexOf(answer);
+
+    if (index == -1) false;
+    pollDatas[pollId].voters[userId].answer.splice(index, 1);
     return true;
 }
