@@ -77,21 +77,29 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
             new Discord.TextInputBuilder()
                 .setCustomId('title')
                 .setLabel('ポールのタイトル')
+                .setPlaceholder("ポールのタイトルを入力してください")
                 .setStyle(Discord.TextInputStyle.Short)
+                .setMaxLength(config.poll.titleMax)
+                .setMinLength(config.poll.titleMin)
         ),
         new Discord.ActionRowBuilder<Discord.TextInputBuilder>().addComponents(
             new Discord.TextInputBuilder()
                 .setCustomId('description')
                 .setLabel('ポールの詳細')
+                .setPlaceholder("ポールの詳細を入力してください")
                 .setStyle(Discord.TextInputStyle.Paragraph)
+                .setMaxLength(config.poll.descriptionMax)
+                .setMinLength(config.poll.descriptionMin)
+                .setRequired(false)
         ),
         new Discord.ActionRowBuilder<Discord.TextInputBuilder>().addComponents(
             new Discord.TextInputBuilder()
                 .setCustomId('contents')
                 .setLabel('アンケート項目 ( : で項目を区切ってください)')
+                .setPlaceholder("項目1:項目2:項目3:項目4")
                 .setStyle(Discord.TextInputStyle.Paragraph)
         )
-        );
+    );
 
     await interaction.showModal(modal);
 }

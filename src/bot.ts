@@ -24,7 +24,7 @@ const client = new Discord.Client({
 
 // エラーハンドリング
 process.on("uncaughtException", (err) => {
-    logger.error(err.toString());
+    console.error(err.toString());
 });
 
 // npm test 等一番上のディレクトリで実行する際

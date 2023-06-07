@@ -1,7 +1,13 @@
 {
 	"token": "",
 	"prefix": "!!t",
-    "maxPoll": 1000,
+    "poll": {
+        "maxPoll": 1000,
+        "titleMax": 50,
+        "titleMin": 5,
+        "descriptionMax": 200,
+        "descriptionMin": 0
+    },
     "commands": {
         "help":["help"]
     },

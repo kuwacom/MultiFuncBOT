@@ -11,7 +11,7 @@ export const getPollData = (pollId: number): Types.PollData | null => {
 }
 
 const maxPollCheck = (): void => {
-    if (Object.keys(pollDatas).length == config.maxPoll) {
+    if (Object.keys(pollDatas).length == config.poll.maxPoll) {
         const timeList: number[] = [];
         Object.keys(pollDatas).forEach((key: any) => {
             timeList.push(pollDatas[key].time);
@@ -22,9 +22,9 @@ const maxPollCheck = (): void => {
     }; 
 }
 
-export const createPoll = (title: string, description: string | null): Types.PollData | null => {
+export const createPoll = (title: string, description: string | null, contents: string[]): Types.PollData | Types.PollState.DuplicateID => {
     const id = randRange(1000000, 9999999);
-    if (!(id in pollDatas)) return null;
+    if (id in pollDatas) return Types.PollState.DuplicateID;
     if (description == '') description = null;
 
     maxPollCheck();
@@ -35,7 +35,7 @@ export const createPoll = (title: string, description: string | null): Types.Pol
         description: description,
         time: new Date().getTime(),
         voters: {},
-        contents: []
+        contents: contents
     }; 
     pollDatas[id] = pollData;
     return pollData;

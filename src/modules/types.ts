@@ -9,7 +9,8 @@ export const embedCollar = {
 }
 
 export enum PollState {
-    NotFund = 'notfound'
+    NotFund = 'notfound',
+    DuplicateID = 'DuplicateID'
 }
 
 export interface Voter {
