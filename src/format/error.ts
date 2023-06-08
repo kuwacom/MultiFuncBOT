@@ -27,6 +27,17 @@ export const interaction = {
         ephemeral: true
     } as Discord.InteractionReplyOptions,
 
+    Created: {
+        embeds: [
+            new Discord.EmbedBuilder()
+            .setColor(Types.embedCollar.error)
+            .setTitle(config.emoji.error+"ポールはすでに作成されています")
+            .setDescription("すでにそのポールは作成されています")
+            .setFooter({ text: config.embed.footerText })
+        ],
+        ephemeral: true
+    } as Discord.InteractionReplyOptions,
+
     // template二個目のエラー
     TemplateError2: (text: string): Discord.InteractionReplyOptions => {
         return {

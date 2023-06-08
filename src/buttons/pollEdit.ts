@@ -1,6 +1,6 @@
 import { logger, config, client } from "../bot";
 import { sleep } from "../modules/utiles";
-import { getPollData } from "../modules/pollManager";
+import * as pollManager from "../modules/pollManager";
 import * as Types from "../modules/types";
 import * as FormatERROR from "../format/error";
 import Discord from "discord.js";
@@ -12,14 +12,20 @@ export const button = {
 export const executeInteraction = async (interaction: Types.DiscordButtonInteraction) => {
     const [cmd, ...values] = interaction.customId.split(":");
 
-    const pollData = getPollData(Number([values]));
+    const pollData = pollManager.getPollData(Number([values]));
     if (!pollData) {
         interaction.reply(FormatERROR.interaction.NotfoundPoll);
         return;
     }
 
+    if (!pollData.editable) {
+        interaction.reply(FormatERROR.interaction.Created);
+        return;
+    }
+
+
     const modal = new Discord.ModalBuilder()
-        .setCustomId('pollCreate')
+        .setCustomId('pollEdit:'+pollData.id)
         .setTitle('ポールの編集');
 
     modal.addComponents(

@@ -23,6 +23,7 @@ export interface PollData {
     title: string;
     description: string | null;
     time: number;
+    editable: boolean;
     voters: {[userId: string]: Voter};
     contents: string[];
 }

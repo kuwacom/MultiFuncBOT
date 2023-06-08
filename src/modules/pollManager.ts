@@ -34,9 +34,10 @@ export const createPoll = (title: string, description: string | null, contents: 
         title: title,
         description: description,
         time: new Date().getTime(),
+        editable: true,
         voters: {},
         contents: contents
-    }; 
+    };
     pollDatas[id] = pollData;
     return pollData;
 }
@@ -46,6 +47,13 @@ export const createPoll = (title: string, description: string | null, contents: 
 //     pollDatas[pollId].contents.push(content);
 //     return true;
 // }
+
+export const pollEditableChange = (pollId: number, editable: boolean):boolean | Types.PollState.NotFund => { // poll作成時に内容を変える用
+    if (!(pollId in pollDatas)) return Types.PollState.NotFund;
+    pollDatas[pollId].editable = editable;
+    return editable;
+}
+
 
 export const updateContents = (pollId: number, contents: string[]):Types.PollState | boolean => { // poll作成時に内容を変える用
     if (!(pollId in pollDatas)) return Types.PollState.NotFund;

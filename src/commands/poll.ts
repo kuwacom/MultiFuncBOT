@@ -95,7 +95,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         new Discord.ActionRowBuilder<Discord.TextInputBuilder>().addComponents(
             new Discord.TextInputBuilder()
                 .setCustomId('contents')
-                .setLabel('アンケート項目 ( : で項目を区切ってください)')
+                .setLabel('アンケート項目 ( : で項目を区切ってください)  最大25項目まで追加できます')
                 .setPlaceholder("項目1:項目2:項目3:項目4")
                 .setStyle(Discord.TextInputStyle.Paragraph)
         )

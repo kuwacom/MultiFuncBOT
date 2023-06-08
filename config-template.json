@@ -14,7 +14,8 @@
     "emoji": {
         "help": "❔",
         "warning": "⚠️",
-        "error": "❌"
+        "error": "❌",
+        "check": "✔"
     },
     "embed": {
         "footerText": "v3.0 Create BY kuwa.app",
