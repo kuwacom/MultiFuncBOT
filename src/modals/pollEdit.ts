@@ -7,19 +7,23 @@ import * as Panel from "../format/panel"
 import Discord from "discord.js";
 
 export const modal = {
-    customId: ["pollCreate"]
+    customId: ["pollEdit"]
 }
 
 export const executeInteraction = async (interaction: Types.DiscordModalSubmitInteraction) => {
+    const [cmd, ...values] = interaction.customId.split(":");
+    const pollId = Number(values[0]);
+    
     const title = interaction.fields.getTextInputValue('title');
     const description = interaction.fields.getTextInputValue('description');
-    const contents = interaction.fields.getTextInputValue('contents').split ('\n').filter(content => content.replace(" ", "").replace("　", "") != '');
+    const contents = interaction.fields.getTextInputValue('contents').split('\n').filter(content => content.replace(" ", "").replace("　", "") != '');
 
-    let pollData = pollManager.createPoll(title, description, contents);
-    if (pollData == Types.PollState.DuplicateID) {
-        await interaction.reply(Error.interaction.ERROR);
-        return;
+    let pollData = pollManager.updateContents(pollId, contents);
+    if (!pollData) {
+        interaction.reply(Error.interaction.NotfoundPoll);
+        return; 
     }
+
     const fields: Discord.EmbedField[] = [
         {
             name: 'タイトル',
@@ -81,7 +85,7 @@ export const executeInteraction = async (interaction: Types.DiscordModalSubmitIn
     const buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
         .addComponents(createButton)
         .addComponents(editButton);
-
+    
     interaction.reply({
         embeds: [ embed ],
         components: [ buttons ],

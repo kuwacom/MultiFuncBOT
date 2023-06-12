@@ -2,7 +2,8 @@ import { logger, config, client } from "../bot";
 import { sleep } from "../modules/utiles";
 import * as pollManager from "../modules/pollManager";
 import * as Types from "../modules/types";
-import * as FormatERROR from "../format/error";
+import * as Error from "../format/error";
+import * as Panel from "../format/panel";
 import Discord from "discord.js";
 
 export const button = {
@@ -15,58 +16,53 @@ export const executeInteraction = async (interaction: Types.DiscordButtonInterac
     
     const pollData = pollManager.getPollData(Number([values]));
     if (!pollData) {
-        interaction.reply(FormatERROR.interaction.NotfoundPoll);
+        interaction.reply(Error.interaction.NotfoundPoll);
         return;
     }
 
     if (!pollData.editable) {
-        interaction.reply(FormatERROR.interaction.Created);
+        interaction.reply(Error.interaction.Created);
         return;
     }
 
-    const pollState = pollManager.pollEditableChange(pollId, false);
+    pollManager.pollEditableChange(pollId, false);
 
-    const fields: Discord.EmbedField[] = [
-        // {
-        //     name: 'タイトル',
-        //     value: title,
-        //     inline: false
-        // }
-    ];
-
-    const embed = new Discord.EmbedBuilder()
-	.setColor(Types.embedCollar.info)
-	.setTitle(config.emoji.check + pollData.title)
-    .addFields(fields)
-    .setFooter({ iconURL: interaction.user.avatarURL() as string, text: `${interaction.user.username}#${interaction.user.discriminator}\n` +
-        config.embed.footerText 
+    interaction.update({
+        embeds: [
+            new Discord.EmbedBuilder()
+                .setColor(Types.embedCollar.info)
+                .setTitle(config.emoji.check + "ポールを作成しました！")
+                .setDescription(
+                    "投票をしてください！\n\n"+
+                    Panel.EmbedPollId(pollData)
+                    )
+                .setFooter({ text: config.embed.footerText })
+        ],
+        components: []
     });
 
-    if (pollData.description) embed.setDescription(pollData.description);
+    const selectMenu = new Discord.StringSelectMenuBuilder()
+        .setCustomId('pollVote:' + pollId)
+        .setPlaceholder('投票してください');
 
-    const createButton = new Discord.ButtonBuilder()
-        .setCustomId('pollCreate:'+pollData.id)
-        .setLabel('作成')
-        // .setEmoji(config.emoji)
-        .setStyle(Discord.ButtonStyle.Success);
-        // .setDisabled(false)
+    // 複数選択機能つける場合はここで set min と set max
 
-    const editButton = new Discord.ButtonBuilder()
-        .setCustomId('pollEdit:'+pollData.id)
-        .setLabel('編集')
-        // .setEmoji(config.emoji)
-        .setStyle(Discord.ButtonStyle.Primary);
-        // .setDisabled(false)
+    pollData.contents.forEach((content, index) => {
+        selectMenu.addOptions(
+            new Discord.StringSelectMenuOptionBuilder()
+            .setLabel(content)
+            .setValue(String(index))
+        );
+    });
 
+    const selectVote = new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
+        .addComponents(selectMenu);
 
-    const buttons = new Discord.ActionRowBuilder<Discord.ButtonBuilder>()
-        .addComponents(createButton)
-        .addComponents(editButton);
-
-    interaction.reply({
-        embeds: [ embed ],
-        components: [ buttons ],
-        ephemeral: true
+    interaction.channel?.send({
+        embeds: [
+            Panel.PollPanelEmbed(pollData)
+        ],
+        components: [ selectVote ]
     });
     return;
 }

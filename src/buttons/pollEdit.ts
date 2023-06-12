@@ -2,7 +2,7 @@ import { logger, config, client } from "../bot";
 import { sleep } from "../modules/utiles";
 import * as pollManager from "../modules/pollManager";
 import * as Types from "../modules/types";
-import * as FormatERROR from "../format/error";
+import * as Error from "../format/error";
 import Discord from "discord.js";
 
 export const button = {
@@ -14,12 +14,12 @@ export const executeInteraction = async (interaction: Types.DiscordButtonInterac
 
     const pollData = pollManager.getPollData(Number([values]));
     if (!pollData) {
-        interaction.reply(FormatERROR.interaction.NotfoundPoll);
+        interaction.reply(Error.interaction.NotfoundPoll);
         return;
     }
 
     if (!pollData.editable) {
-        interaction.reply(FormatERROR.interaction.Created);
+        interaction.reply(Error.interaction.Created);
         return;
     }
 
@@ -53,9 +53,9 @@ export const executeInteraction = async (interaction: Types.DiscordButtonInterac
         new Discord.ActionRowBuilder<Discord.TextInputBuilder>().addComponents(
             new Discord.TextInputBuilder()
                 .setCustomId('contents')
-                .setLabel('アンケート項目 ( : で項目を区切ってください)')
-                .setPlaceholder("項目1:項目2:項目3:項目4")
-                .setValue(pollData.contents.join(':'))
+                .setLabel('アンケート項目 (項目は行ごとです)')
+                .setPlaceholder('項目1\n項目2\n項目3\n項目4')
+                .setValue(pollData.contents.join('\n'))
                 .setStyle(Discord.TextInputStyle.Paragraph)
         )
     );

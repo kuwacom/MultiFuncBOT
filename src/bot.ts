@@ -6,7 +6,7 @@ import { autoDeleteMessage, slashCommands, commands, buttons, selectMenus, modal
 import * as pollManager from "./modules/pollManager";
 import { Logger } from 'tslog'
 import * as Types from "./modules/types";
-import * as FormatERROR from "./format/error";
+import * as Error from "./format/error";
 
 const logger = new Logger();
 const client = new Discord.Client({
@@ -150,7 +150,7 @@ client.on("messageCreate", async (message) => {
         return;
     };
 
-    autoDeleteMessage(await message.reply(FormatERROR.message.NotfoundCommand));
+    autoDeleteMessage(await message.reply(Error.message.NotfoundCommand));
     return;
 });
 

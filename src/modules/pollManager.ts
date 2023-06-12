@@ -13,10 +13,10 @@ export const getPollData = (pollId: number): Types.PollData | null => {
 const maxPollCheck = (): void => {
     if (Object.keys(pollDatas).length == config.poll.maxPoll) {
         const timeList: number[] = [];
-        Object.keys(pollDatas).forEach((key: any) => {
+        Object.keys(pollDatas).forEach((key: any) => { // ポールの作成時間をarrayに
             timeList.push(pollDatas[key].time);
         });
-        Object.keys(pollDatas).forEach((key: any) => {
+        Object.keys(pollDatas).forEach((key: any) => { // 作成時間が一番古いのを消す
             if (pollDatas[key].time == Math.min(...timeList)) delete pollDatas[key]; 
         }); 
     }; 
@@ -38,7 +38,7 @@ export const createPoll = (title: string, description: string | null, contents: 
         voters: {},
         contents: contents
     };
-    pollDatas[id] = pollData;
+    pollDatas[id] = pollData; 
     return pollData;
 }
 
@@ -48,17 +48,17 @@ export const createPoll = (title: string, description: string | null, contents: 
 //     return true;
 // }
 
-export const pollEditableChange = (pollId: number, editable: boolean):boolean | Types.PollState.NotFund => { // poll作成時に内容を変える用
+export const pollEditableChange = (pollId: number, editable: boolean):Types.PollData | Types.PollState.NotFund => { // poll作成時に内容を変える用
     if (!(pollId in pollDatas)) return Types.PollState.NotFund;
     pollDatas[pollId].editable = editable;
-    return editable;
+    return pollDatas[pollId];
 }
 
 
-export const updateContents = (pollId: number, contents: string[]):Types.PollState | boolean => { // poll作成時に内容を変える用
-    if (!(pollId in pollDatas)) return Types.PollState.NotFund;
+export const updateContents = (pollId: number, contents: string[]):Types.PollData | null => { // poll作成時に内容を変える用
+    if (!(pollId in pollDatas)) return null;
     pollDatas[pollId].contents = contents;
-    return true;
+    return pollDatas[pollId];
 }
 
 export const checkVoterALL = (pollId: number, userId: string):Types.PollState | boolean => { // 1つでも票がが存在するかどうか
@@ -85,7 +85,7 @@ export const addVote = (pollId: number, userId: string, answer: number):Types.Po
 
 export const removeVote = (pollId: number, userId: string, answer: number):Types.PollState | boolean => { // 票の追加
     if (!(pollId in pollDatas)) return Types.PollState.NotFund;
-    var index = pollDatas[pollId].voters[userId].answer.indexOf(answer);
+    let index = pollDatas[pollId].voters[userId].answer.indexOf(answer);
 
     if (index == -1) false;
     pollDatas[pollId].voters[userId].answer.splice(index, 1);

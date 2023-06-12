@@ -3,7 +3,7 @@ import { sleep, slashCommands } from "../modules/utiles";
 import * as Types from "../modules/types";
 import Discord from "discord.js";
 
-import * as FormatERROR from "../format/error";
+import * as Error from "../format/error";
 import * as FormatButton from "../format/button";
 
 export const command = {

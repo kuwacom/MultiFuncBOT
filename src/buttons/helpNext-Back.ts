@@ -1,7 +1,7 @@
 import { logger, config, client } from "../bot";
 import { autoDeleteMessage, sec2HHMMSS, sleep, slashCommands } from "../modules/utiles";
 import * as Types from "../modules/types";
-import * as FormatERROR from "../format/error";
+import * as Error from "../format/error";
 import * as FormatButton from "../format/button";
 import Discord from "discord.js";
 
