@@ -4,9 +4,10 @@
     "poll": {
         "maxPoll": 1000,
         "titleMax": 50,
-        "titleMin": 5,
+        "titleMin": 0,
         "descriptionMax": 200,
-        "descriptionMin": 0
+        "descriptionMin": 0,
+        "barSize": 20
     },
     "commands": {
         "help":["help"]
@@ -15,10 +16,15 @@
         "help": "❔",
         "warning": "⚠️",
         "error": "❌",
-        "check": "✔"
+        "check": "✔",
+        "progressBar": {
+            "left": "|",
+            "right": " ",
+            "dot": "|"
+        }
     },
     "embed": {
-        "footerText": "v3.0 Create BY kuwa.app",
+        "footerText": "v2.2 Create BY kuwa.app",
         "colors": {
             "info": "#87ceeb",
             "success": "#00fa9a",

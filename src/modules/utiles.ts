@@ -1,5 +1,6 @@
 import Discord from "discord.js";
 import * as Types from "./types";
+import { config } from "../bot";
 
 export const slashCommands: Types.SlashCommand[] = [];
 export const commands: { [commandName: string]: Types.Command } = {};
@@ -72,4 +73,12 @@ export const bitParser = (size: number) => {
     }
     const res = target !== null?Math.floor((size / target) * 100) / 100 : size;
     return res + unit;
+}
+
+export const progressBar = (nowDuration: number, duration: number): string => {
+    const progress = nowDuration / duration;
+    const numBars = Math.floor(progress * config.poll.barSize);
+    const leftAxis = config.emoji.progressBar.left.repeat(numBars); // 左の部分
+    const rightAxis = config.emoji.progressBar.right.repeat(config.poll.barSize - numBars - 1); // 右の部分
+    return leftAxis+config.emoji.progressBar.dot+rightAxis;
 }
