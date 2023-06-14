@@ -1,5 +1,4 @@
 import { logger, config, client } from "../bot";
-import { sleep } from "../modules/utiles";
 import * as pollManager from "../modules/pollManager";
 import * as Types from "../modules/types";
 import * as Error from "../format/error";
@@ -13,8 +12,13 @@ export const selectMenu = {
 export const executeInteraction = async (interaction: Types.DiscordSelectMenuInteraction) => {
     const [cmd, ...values] = interaction.customId.split(":");
     const pollId = Number(values[0]);
+    const guildId = interaction.guildId;
+    if (!guildId) {
+        interaction.reply(Error.interaction.ERROR)
+        return;
+    }
     
-    const pollData = pollManager.getPollData(Number([values]));
+    const pollData = pollManager.getPollData(guildId, pollId);
     if (!pollData) {
         interaction.reply(Error.interaction.NotfoundPoll);
         return; 
@@ -30,22 +34,37 @@ export const executeInteraction = async (interaction: Types.DiscordSelectMenuInt
 
     let embed;
 
-    let index = pollData.voters[userId].answer.indexOf(answer);
+    let index = pollManager.toggleVote(guildId, pollId, userId, answer);
     if (index == -1) {
-        pollData.voters[userId].answer.push(answer);
         embed = new Discord.EmbedBuilder()
             .setColor(Types.embedCollar.success)
             .setTitle(config.emoji.check + '投票しました！')
             .setDescription('**' + pollData.contents[answer] + '** へ投票しました！')
             .setFooter({ text: config.embed.footerText })
     } else {
-        pollData.voters[userId].answer.splice(index, 1);
         embed = new Discord.EmbedBuilder()
             .setColor(Types.embedCollar.warning)
             .setTitle(config.emoji.check + '投票を解除しました...')
             .setDescription('**' + pollData.contents[answer] + '** への投票を解除しました')
             .setFooter({ text: config.embed.footerText })
     }
+
+    // let index = pollData.voters[userId].answer.indexOf(answer);
+    // if (index == -1) {
+    //     pollData.voters[userId].answer.push(answer);
+    //     embed = new Discord.EmbedBuilder()
+    //         .setColor(Types.embedCollar.success)
+    //         .setTitle(config.emoji.check + '投票しました！')
+    //         .setDescription('**' + pollData.contents[answer] + '** へ投票しました！')
+    //         .setFooter({ text: config.embed.footerText })
+    // } else {
+    //     pollData.voters[userId].answer.splice(index, 1);
+    //     embed = new Discord.EmbedBuilder()
+    //         .setColor(Types.embedCollar.warning)
+    //         .setTitle(config.emoji.check + '投票を解除しました...')
+    //         .setDescription('**' + pollData.contents[answer] + '** への投票を解除しました')
+    //         .setFooter({ text: config.embed.footerText })
+    // }
 
     await interaction.update({
         embeds: [

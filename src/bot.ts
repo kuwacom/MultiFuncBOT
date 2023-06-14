@@ -4,6 +4,7 @@ import config from "../config.json";
 import fs from "fs";
 import { autoDeleteMessage, slashCommands, commands, buttons, selectMenus, modals, sleep, sec2HHMMSS, randRange } from "./modules/utiles"
 import * as pollManager from "./modules/pollManager";
+import * as dbManager from "./modules/dbManager";
 import { Logger } from 'tslog'
 import * as Types from "./modules/types";
 import * as Error from "./format/error";
@@ -131,6 +132,7 @@ client.once("ready", async () => {
     debugGlobal();
     statusTask();
     // setSlashCommand();
+    dbManager.initialize();
 });
 
 client.on("messageCreate", async (message) => {

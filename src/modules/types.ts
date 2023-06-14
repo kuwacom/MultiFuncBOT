@@ -28,6 +28,11 @@ export interface PollData {
     contents: string[];
 }
 
+export interface ServerDB {
+    id: string;
+    pollDatas: {[pollId: number]: PollData}
+}
+
 interface SlashCommandOption {
     name: string;
     description: string;

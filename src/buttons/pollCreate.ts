@@ -13,8 +13,13 @@ export const button = {
 export const executeInteraction = async (interaction: Types.DiscordButtonInteraction) => {
     const [cmd, ...values] = interaction.customId.split(":");
     const pollId = Number(values[0]);
-    
-    const pollData = pollManager.getPollData(Number([values]));
+    const guildId = interaction.guildId;
+    if (!guildId) {
+        interaction.reply(Error.interaction.ERROR)
+        return;
+    }
+
+    const pollData = pollManager.getPollData(guildId, pollId);
     if (!pollData) {
         interaction.reply(Error.interaction.NotfoundPoll);
         return;
@@ -25,7 +30,7 @@ export const executeInteraction = async (interaction: Types.DiscordButtonInterac
         return;
     }
 
-    pollManager.pollEditableChange(pollId, false);
+    pollManager.pollEditableChange(guildId, pollId, false);
 
     interaction.update({
         embeds: [

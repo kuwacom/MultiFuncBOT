@@ -13,9 +13,14 @@ export const modal = {
 export const executeInteraction = async (interaction: Types.DiscordModalSubmitInteraction) => {
     const title = interaction.fields.getTextInputValue('title');
     const description = interaction.fields.getTextInputValue('description');
-    const contents = interaction.fields.getTextInputValue('contents').split ('\n').filter(content => content.replace(" ", "").replace("　", "") != '');
-
-    let pollData = pollManager.createPoll(title, description, contents);
+    const contents = interaction.fields.getTextInputValue('contents').split ('\n').filter(content => content.replace(" ", "").replace("　", "") != '').slice(0, 24);
+    const guildId = interaction.guildId;
+    if (!guildId) {
+        interaction.reply(Error.interaction.ERROR)
+        return;
+    }
+    
+    let pollData = pollManager.createPoll(guildId, title, description, contents);
     if (pollData == Types.PollState.DuplicateID) {
         await interaction.reply(Error.interaction.ERROR);
         return;

@@ -16,9 +16,14 @@ export const executeInteraction = async (interaction: Types.DiscordModalSubmitIn
     
     const title = interaction.fields.getTextInputValue('title');
     const description = interaction.fields.getTextInputValue('description');
-    const contents = interaction.fields.getTextInputValue('contents').split('\n').filter(content => content.replace(" ", "").replace("　", "") != '');
+    const contents = interaction.fields.getTextInputValue('contents').split('\n').filter(content => content.replace(" ", "").replace("　", "") != '').slice(0, 24);
+    const guildId = interaction.guildId;
+    if (!guildId) {
+        interaction.reply(Error.interaction.ERROR)
+        return;
+    }
 
-    let pollData = pollManager.updateContents(pollId, contents);
+    let pollData = pollManager.updateContents(guildId, pollId, contents);
     if (!pollData) {
         interaction.reply(Error.interaction.NotfoundPoll);
         return; 

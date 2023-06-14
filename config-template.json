@@ -2,7 +2,7 @@
 	"token": "",
 	"prefix": "!!t",
     "poll": {
-        "maxPoll": 1000,
+        "maxPoll": 10,
         "titleMax": 50,
         "titleMin": 0,
         "descriptionMax": 200,
@@ -31,5 +31,8 @@
             "warning": "#ffa500",
             "error": "#ff0000"
         }
+    },
+    "path": {
+        "serverDB": "./serverDB"
     }
 }

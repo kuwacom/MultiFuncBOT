@@ -1,16 +1,18 @@
 import Discord from "discord.js";
-import * as Types from "./types"
+import * as Types from "./types";
+import * as dbManager from "./dbManager";
 import { randRange } from "./utiles";
 import { config } from "../bot";
 
-export const pollDatas: { [pollId: number]: Types.PollData} = {};
 
-export const getPollData = (pollId: number): Types.PollData | null => {
+export const getPollData = (guildId: string, pollId: number): Types.PollData | null => {
+    const pollDatas = dbManager.getServerDB(guildId).pollDatas;
+    if (!pollDatas) dbManager.getServerDB(guildId).pollDatas = {};
     if (!(pollId in pollDatas)) return null;
     return pollDatas[pollId];
 }
 
-const maxPollCheck = (): void => {
+const maxPollCheck = (pollDatas: {[pollId: number]: Types.PollData}): void => {
     if (Object.keys(pollDatas).length == config.poll.maxPoll) {
         const timeList: number[] = [];
         Object.keys(pollDatas).forEach((key: any) => { // ポールの作成時間をarrayに
@@ -22,15 +24,20 @@ const maxPollCheck = (): void => {
     }; 
 }
 
-export const createPoll = (title: string, description: string | null, contents: string[]): Types.PollData | Types.PollState.DuplicateID => {
-    const id = randRange(1000000, 9999999);
-    if (id in pollDatas) return Types.PollState.DuplicateID;
+export const createPoll = (guildId: string, title: string, description: string | null, contents: string[]): Types.PollData | Types.PollState.DuplicateID => {
+    const pollDatas = dbManager.getServerDB(guildId).pollDatas;
+    const pollId = randRange(1000000, 9999999);
+    if (pollDatas) {
+        if (pollId in pollDatas) return Types.PollState.DuplicateID;
+        maxPollCheck(pollDatas);
+    } else {
+        dbManager.getServerDB(guildId).pollDatas = {};
+    }
+
     if (description == '') description = null;
 
-    maxPollCheck();
-
     const pollData = {
-        id: id,
+        id: pollId,
         title: title,
         description: description,
         time: new Date().getTime(),
@@ -38,56 +45,79 @@ export const createPoll = (title: string, description: string | null, contents: 
         voters: {},
         contents: contents
     };
-    pollDatas[id] = pollData; 
+    pollDatas[pollId] = pollData;
+    dbManager.saveServerDB(guildId);
     return pollData;
 }
 
 // export const addContent = (pollId: number, content: string):Types.PollState | boolean => { // poll作成時内容ついか
-//     if (!(pollId in pollDatas)) return Types.PollState.NotFund;
+//     if (!pollDatas || !(pollId in pollDatas)) return Types.PollState.NotFund;
 //     pollDatas[pollId].contents.push(content);
 //     return true;
 // }
 
-export const pollEditableChange = (pollId: number, editable: boolean):Types.PollData | Types.PollState.NotFund => { // poll作成時に内容を変える用
-    if (!(pollId in pollDatas)) return Types.PollState.NotFund;
-    pollDatas[pollId].editable = editable;
-    return pollDatas[pollId];
+export const pollEditableChange = (guildId: string, pollId: number, editable: boolean):Types.PollData | Types.PollState.NotFund => { // poll作成時に内容を変える用
+    const pollData = getPollData(guildId, pollId);
+    if (!pollData) return Types.PollState.NotFund;
+    pollData.editable = editable;
+    dbManager.saveServerDB(guildId);
+    return pollData;
 }
 
 
-export const updateContents = (pollId: number, contents: string[]):Types.PollData | null => { // poll作成時に内容を変える用
-    if (!(pollId in pollDatas)) return null;
-    pollDatas[pollId].contents = contents;
-    return pollDatas[pollId];
+export const updateContents = (guildId: string, pollId: number, contents: string[]):Types.PollData | null => { // poll作成時に内容を変える用
+    const pollData = getPollData(guildId, pollId);
+    if (!pollData) return null;
+    pollData.contents = contents;
+    dbManager.saveServerDB(guildId);
+    return pollData;
 }
 
-export const checkVoterALL = (pollId: number, userId: string):Types.PollState | boolean => { // 1つでも票がが存在するかどうか
-    if (!(pollId in pollDatas)) return Types.PollState.NotFund;
-    if (userId in pollDatas[pollId].voters) return true;
-    return false;
+// export const checkVoterALL = (guildId: string, pollId: number, userId: string):Types.PollState | boolean => { // 1つでも票がが存在するかどうか
+//     const pollDatas = dbManager.getServerDB(guildId).pollDatas;
+//     if (!pollDatas || !(pollId in pollDatas)) return Types.PollState.NotFund;
+//     if (userId in pollDatas[pollId].voters) return true;
+//     return false;
+// }
+
+// export const checkVoterContent = (guildId: string, pollId: number, userId: string):Types.PollState | boolean => { // 同じ票が存在するかどうか
+//     const pollDatas = dbManager.getServerDB(guildId).pollDatas;
+//     if (!pollDatas || !(pollId in pollDatas)) return Types.PollState.NotFund;
+//     if (userId in pollDatas[pollId].voters) return true;
+//     return false;
+// }
+
+export const toggleVote = (guildId: string, pollId: number, userId: string, answer: number): Types.PollState | number => {
+    const pollData = getPollData(guildId, pollId);
+    if (!pollData) return Types.PollState.NotFund;
+    const index = pollData.voters[userId].answer.indexOf(answer);
+    if (index == -1) {
+        addVote(guildId, pollId, userId, answer);
+    } else {
+        removeVote(guildId, pollId, userId, answer);
+    }
+    return index;
 }
 
-export const checkVoterContent = (pollId: number, userId: string):Types.PollState | boolean => { // 同じ票が存在するかどうか
-    if (!(pollId in pollDatas)) return Types.PollState.NotFund;
-    if (userId in pollDatas[pollId].voters) return true;
-    return false;
-}
-
-export const addVote = (pollId: number, userId: string, answer: number):Types.PollState | boolean => { // 票の追加
-    if (!(pollId in pollDatas)) return Types.PollState.NotFund;
-    if (!pollDatas[pollId].voters[userId]) pollDatas[pollId].voters[userId] = {
+export const addVote = (guildId: string, pollId: number, userId: string, answer: number):Types.PollState | boolean => { // 票の追加
+    const pollData = getPollData(guildId, pollId);
+    if (!pollData) return Types.PollState.NotFund;
+    if (!pollData.voters[userId]) pollData.voters[userId] = {
         id: userId,
         answer: []
     };
-    pollDatas[pollId].voters[userId].answer.push(answer);
+    pollData.voters[userId].answer.push(answer);
+    dbManager.saveServerDB(guildId);
     return true;
 }
 
-export const removeVote = (pollId: number, userId: string, answer: number):Types.PollState | boolean => { // 票の追加
-    if (!(pollId in pollDatas)) return Types.PollState.NotFund;
-    let index = pollDatas[pollId].voters[userId].answer.indexOf(answer);
+export const removeVote = (guildId: string, pollId: number, userId: string, answer: number):Types.PollState | boolean => { // 票の追加
+    const pollData = getPollData(guildId, pollId);
+    if (!pollData) return Types.PollState.NotFund;
+    let index = pollData.voters[userId].answer.indexOf(answer);
 
     if (index == -1) false;
-    pollDatas[pollId].voters[userId].answer.splice(index, 1);
+    pollData.voters[userId].answer.splice(index, 1);
+    dbManager.saveServerDB(guildId);
     return true;
 }

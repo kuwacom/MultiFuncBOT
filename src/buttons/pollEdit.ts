@@ -11,8 +11,14 @@ export const button = {
 
 export const executeInteraction = async (interaction: Types.DiscordButtonInteraction) => {
     const [cmd, ...values] = interaction.customId.split(":");
+    const pollId = Number(values[0]);
+    const guildId = interaction.guildId;
+    if (!guildId) {
+        interaction.reply(Error.interaction.ERROR)
+        return;
+    }
 
-    const pollData = pollManager.getPollData(Number([values]));
+    const pollData = pollManager.getPollData(guildId, pollId);
     if (!pollData) {
         interaction.reply(Error.interaction.NotfoundPoll);
         return;
