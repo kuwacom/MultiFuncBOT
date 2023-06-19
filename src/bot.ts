@@ -129,7 +129,7 @@ client.on("ready", async() => {
 client.once("ready", async () => {
     debugGlobal();
     statusTask();
-    // setSlashCommand();
+    setSlashCommand();
     dbManager.initialize();
 });
 
