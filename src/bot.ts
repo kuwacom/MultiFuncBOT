@@ -1,25 +1,31 @@
-import Discord from "discord.js";
+import Discord, { GuildStickerManager, channelLink } from "discord.js";
 // @ts-ignore
 import config from "../config.json";
 import fs from "fs";
 import { autoDeleteMessage, slashCommands, commands, buttons, selectMenus, modals, sleep, sec2HHMMSS, randRange } from "./modules/utiles"
-import * as pollManager from "./modules/pollManager";
 import * as dbManager from "./modules/dbManager";
 import { Logger } from 'tslog'
 import * as Types from "./modules/types";
 import * as Error from "./format/error";
+import { content } from "googleapis/build/src/apis/content";
 
 const logger = new Logger();
 const client = new Discord.Client({
     intents: [
         Discord.GatewayIntentBits.Guilds,
         Discord.GatewayIntentBits.GuildMessages,
+        Discord.GatewayIntentBits.DirectMessages,
+        Discord.GatewayIntentBits.DirectMessageReactions,
         Discord.GatewayIntentBits.MessageContent,
         Discord.GatewayIntentBits.GuildVoiceStates,
         Discord.GatewayIntentBits.GuildMessageReactions,
         Discord.GatewayIntentBits.DirectMessageReactions,
         Discord.GatewayIntentBits.GuildEmojisAndStickers
     ],
+    partials: [
+        Discord.Partials.Channel,
+        Discord.Partials.Message
+    ]
     // ws: { properties: { browser: "Discord iOS" } } 
 });
 
@@ -136,6 +142,36 @@ client.once("ready", async () => {
 });
 
 client.on("messageCreate", async (message) => {
+
+    if (message.guild) {
+        const serverDB = dbManager.getServerDB(message.guild.id)
+        serverDB.TC2DM.forEach(async(tc2dm) => { // dm へ送信
+            if (tc2dm.channelId != message.channel.id) return;
+            const user = client.users.cache.get(tc2dm.userId); // ここは高速化のためにキャッシュを使う
+            if (!user?.dmChannel) return;
+            user.dmChannel.send(message.content);
+        });
+    } else { // dm
+        Object.keys(dbManager.serverDBs).forEach(async(key) => {
+            const serverDB = dbManager.getServerDB(key);
+            serverDB.TC2DM.forEach(async(tc2dm) => {
+                const user = await client.users.fetch(tc2dm.userId);
+                if (user.dmChannel?.id != message.channel.id) return;
+                const channel = client.channels.cache.get(tc2dm.channelId); // ここは高速化のためにキャッシュを使う
+                if (!channel || channel.type != Discord.ChannelType.GuildText) return;
+                const embed = new Discord.EmbedBuilder()
+                    .setColor(Types.embedCollar.info)
+                    .setAuthor({
+                        name: user.username,
+                        iconURL: user.avatarURL() ? (user.avatarURL() as string) : undefined
+                    })
+                    .setDescription(message.content)
+                    .setFooter({ text: config.embed.footerText });
+                channel.send({ embeds: [ embed ] });
+            });
+        });
+    }
+
     if (message.author.bot || !message.member || !message.guild || !message.content.split(" ")[0].startsWith(config.prefix)) return;
     const [cmd, ...args] = message.content.slice(config.prefix.length).replace("　", " ").split(" ").filter(v => v != "");
 

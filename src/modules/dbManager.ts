@@ -28,7 +28,8 @@ export const initialize = async(): Promise<void> => {
 export const getServerDB = (guildId: string): Types.ServerDB => {
     if (!serverDBs[guildId]) serverDBs[guildId] = {
         id: guildId,
-        pollDatas: {}
+        pollDatas: {},
+        TC2DM: []
     };
     return serverDBs[guildId];
     // const serverDB = serverDBs[guildId];

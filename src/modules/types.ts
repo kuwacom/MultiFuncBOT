@@ -28,9 +28,15 @@ export interface PollData {
     contents: string[];
 }
 
+export interface TC2DM {
+    channelId: string;
+    userId: string;
+}
+
 export interface ServerDB {
     id: string;
-    pollDatas: {[pollId: number]: PollData}
+    pollDatas: {[pollId: number]: PollData};
+    TC2DM: TC2DM[];
 }
 
 interface SlashCommandOption {
