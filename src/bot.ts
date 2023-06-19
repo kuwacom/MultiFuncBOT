@@ -7,7 +7,6 @@ import * as dbManager from "./modules/dbManager";
 import { Logger } from 'tslog'
 import * as Types from "./modules/types";
 import * as Error from "./format/error";
-import { content } from "googleapis/build/src/apis/content";
 
 const logger = new Logger();
 const client = new Discord.Client({
@@ -123,13 +122,6 @@ async function setSlashCommand() {
     logger.info("Global set application Ready!");
 }
 
-// async function pollLifeTask() {
-//     Object.keys(pollManager.pollData).forEach((key: string) => {
-//         pollManager.pollDatas[key]
-        
-// });
-// }
-
 client.on("ready", async() => {
     logger.info(`Login to Discord with ${client.user?.username}`);
 });
@@ -142,14 +134,15 @@ client.once("ready", async () => {
 });
 
 client.on("messageCreate", async (message) => {
+    if (message.author.bot) return;
 
     if (message.guild) {
         const serverDB = dbManager.getServerDB(message.guild.id)
         serverDB.TC2DM.forEach(async(tc2dm) => { // dm へ送信
             if (tc2dm.channelId != message.channel.id) return;
             const user = client.users.cache.get(tc2dm.userId); // ここは高速化のためにキャッシュを使う
-            if (!user?.dmChannel) return;
-            user.dmChannel.send(message.content);
+            if (!user) return;
+            user.send(message.content);
         });
     } else { // dm
         Object.keys(dbManager.serverDBs).forEach(async(key) => {
@@ -172,7 +165,7 @@ client.on("messageCreate", async (message) => {
         });
     }
 
-    if (message.author.bot || !message.member || !message.guild || !message.content.split(" ")[0].startsWith(config.prefix)) return;
+    if (!message.member || !message.guild || !message.content.split(" ")[0].startsWith(config.prefix)) return;
     const [cmd, ...args] = message.content.slice(config.prefix.length).replace("　", " ").split(" ").filter(v => v != "");
 
     // Object.keys(commands).forEach((commandName) => {

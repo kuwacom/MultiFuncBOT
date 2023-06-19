@@ -38,6 +38,13 @@ export const command = {
                     description: "切断したいユーザーを選択してください",
                     required: true,
                     type: 6
+                },
+                {
+                    name: "channel",
+                    description: "接続したいチャンネルを選択してください",
+                    required: false,
+                    type: 7,
+                    channel_types: [0,2]
                 }
             ]
         }
@@ -57,12 +64,12 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
 
     const subCommand = interaction.options.getSubcommand();
 
-    const targetUserId = interaction.options.getUser("user")?.id;
-    if (!targetUserId) return;
-    let targetChannelId = interaction.options.getChannel("channel")?.id;
-    if (!targetChannelId) targetChannelId = interaction.channel.id;
-
     if (subCommand == "link") {
+        const targetUserId = interaction.options.getUser("user")?.id;
+        if (!targetUserId) return;
+        let targetChannelId = interaction.options.getChannel("channel")?.id;
+        if (!targetChannelId) targetChannelId = interaction.channel.id;
+    
         const linkRe = TC2DMManager.link(interaction.guild.id, targetChannelId, targetUserId);
         let embed;
         
@@ -89,6 +96,11 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         return;
     
     } else if (subCommand == "unlink") {
+        const targetUserId = interaction.options.getUser("user")?.id;
+        if (!targetUserId) return;
+        let targetChannelId = interaction.options.getChannel("channel")?.id;
+        if (!targetChannelId) targetChannelId = interaction.channel.id;
+    
         const linkRe = TC2DMManager.unLink(interaction.guild.id, targetChannelId, targetUserId);
         let embed;
         

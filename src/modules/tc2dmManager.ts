@@ -18,7 +18,7 @@ export const link = (guildId: string, channelId: string, userId: string): boolea
 export const unLink = (guildId: string, channelId: string, userId: string): boolean => {
     const serverDB = dbManager.getServerDB(guildId);
     const TC2DMIndex = serverDB.TC2DM.findIndex( TC2DM => TC2DM.channelId == channelId && TC2DM.userId == userId);
-    if (TC2DMIndex == -1) false;
+    if (TC2DMIndex == -1) return false;
     serverDB.TC2DM.splice(TC2DMIndex, 1);
     dbManager.saveServerDB(guildId);
     return true;
