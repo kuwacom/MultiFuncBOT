@@ -1,6 +1,7 @@
 {
 	"token": "",
 	"prefix": "!!t",
+    "status": "ここにステータス",
     "poll": {
         "maxPoll": 10,
         "titleMax": 50,

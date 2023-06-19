@@ -1,5 +1,4 @@
 import { logger, config, client } from "../bot";
-import { sleep, slashCommands } from "../modules/utiles";
 import * as Types from "../modules/types";
 import * as TC2DMManager from "../modules/tc2dmManager";
 import Discord from "discord.js";

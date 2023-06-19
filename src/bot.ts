@@ -89,17 +89,14 @@ async function debugGlobal() { // デバッグ用の変数
 
 async function statusTask() {
     // client.user?.setStatus("idle");
-    while (1) {
-        let guildSize // https://discordjs.guide/sharding/#fetchclientvalues
-        await client.shard?.fetchClientValues("guilds.cache.size")
-            .then(results => {
-                guildSize = results.reduce((acc, guildCount) => (acc as number) + (guildCount as number));
-            });
-        client.user?.setPresence({ activities: [{ name: `${guildSize} サーバー`, type: Discord.ActivityType.Competing }] });
-        await sleep(10000);
-        client.user?.setPresence({ activities: [{ name: `/help`, type: Discord.ActivityType.Listening }] });
-        await sleep(5000);
-    }
+    // while (1) {
+    //     let guildSize // https://discordjs.guide/sharding/#fetchclientvalues
+    //     await client.shard?.fetchClientValues("guilds.cache.size")
+    //         .then(results => {
+    //             guildSize = results.reduce((acc, guildCount) => (acc as number) + (guildCount as number));
+    //         });
+    // }
+        client.user?.setPresence({ activities: [{ name: config.status, type: Discord.ActivityType.Playing }] });
 }
 
 async function setSlashCommand() {
