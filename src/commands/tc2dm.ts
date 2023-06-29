@@ -46,6 +46,11 @@ export const command = {
                     channel_types: [0,2]
                 }
             ]
+        },
+        {
+            name: "list",
+            description: "現在リンクしているDMのリストを表示します",
+            type: 1
         }
     ]
 }

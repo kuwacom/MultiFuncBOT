@@ -23,7 +23,12 @@ export interface PollData {
     title: string;
     description: string | null;
     time: number;
+    pollMessage: {
+        id: string;
+        channelId: string;
+    } | null;
     editable: boolean;
+    otherAnswerChannelId: boolean | string;
     multiple: boolean;
     voters: {[userId: string]: Voter};
     contents: string[];

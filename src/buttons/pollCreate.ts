@@ -60,14 +60,24 @@ export const executeInteraction = async (interaction: Types.DiscordButtonInterac
         );
     });
 
+    if (pollData.otherAnswerChannelId) {
+        selectMenu.addOptions(
+            new Discord.StringSelectMenuOptionBuilder()
+            .setLabel('その他の回答')
+            .setValue('otherAnswer')
+        );
+    }
+
     const selectVote = new Discord.ActionRowBuilder<Discord.StringSelectMenuBuilder>()
         .addComponents(selectMenu);
 
-    interaction.channel?.send({
+    const pollMessage = await interaction.channel?.send({
         embeds: [
             Panel.PollPanelEmbed(pollData)
         ],
         components: [ selectVote ]
     });
+    if (!pollMessage?.id) return;
+    pollManager.setPollMessage(guildId, pollId, pollMessage.id, pollMessage.channel.id);
     return;
 }

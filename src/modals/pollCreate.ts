@@ -11,6 +11,10 @@ export const modal = {
 }
 
 export const executeInteraction = async (interaction: Types.DiscordModalSubmitInteraction) => {
+    const [cmd, ...values] = interaction.customId.split(":");    
+    const otherAnswerChannelId =  values[0] == "" ? false : values[0];
+    const multiple = values[0] == "true" ? true : false;
+
     const title = interaction.fields.getTextInputValue('title');
     const description = interaction.fields.getTextInputValue('description');
     const contents = interaction.fields.getTextInputValue('contents').split ('\n').filter(content => content.replace(" ", "").replace("　", "") != '').slice(0, 24);
@@ -20,7 +24,7 @@ export const executeInteraction = async (interaction: Types.DiscordModalSubmitIn
         return;
     }
     
-    let pollData = pollManager.createPoll(guildId, title, description, contents);
+    let pollData = pollManager.createPoll(guildId, title, description, otherAnswerChannelId, multiple, contents);
     if (pollData == Types.PollState.DuplicateID) {
         await interaction.reply(Error.interaction.ERROR);
         return;

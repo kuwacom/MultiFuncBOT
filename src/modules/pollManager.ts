@@ -24,7 +24,7 @@ const maxPollCheck = (pollDatas: {[pollId: number]: Types.PollData}): void => {
     }; 
 }
 
-export const createPoll = (guildId: string, title: string, description: string | null, contents: string[]): Types.PollData | Types.PollState.DuplicateID => {
+export const createPoll = (guildId: string, title: string, description: string | null, otherAnswerChannelId: string | boolean, multiple: boolean , contents: string[]): Types.PollData | Types.PollState.DuplicateID => {
     const pollDatas = dbManager.getServerDB(guildId).pollDatas;
     const pollId = randRange(1000000, 9999999);
     if (pollDatas) {
@@ -40,12 +40,36 @@ export const createPoll = (guildId: string, title: string, description: string |
         id: pollId,
         title: title,
         description: description,
+        pollMessageId: null,
         time: new Date().getTime(),
+        pollMessage: null,
         editable: true,
+        otherAnswerChannelId: otherAnswerChannelId,
+        multiple: multiple,
         voters: {},
         contents: contents
     };
     pollDatas[pollId] = pollData;
+    dbManager.saveServerDB(guildId);
+    return pollData;
+}
+
+export const deletePoll = (guildId: string, pollId: number):Types.PollData | null => {
+    const pollDatas = dbManager.getServerDB(guildId).pollDatas;
+    if (!pollDatas) dbManager.getServerDB(guildId).pollDatas = {};
+    if (!(pollId in pollDatas)) return null;
+    const pollData = pollDatas[pollId];
+    delete pollDatas[pollId];
+    return pollData;
+}
+
+export const setPollMessage = (guildId: string, pollId: number, pollMessageId: string, pollMessageChannel: string):Types.PollData | null => {
+    const pollData = getPollData(guildId, pollId);
+    if (!pollData) return null;
+    pollData.pollMessage = {
+        id: pollMessageId,
+        channelId: pollMessageChannel
+    };
     dbManager.saveServerDB(guildId);
     return pollData;
 }
@@ -56,9 +80,9 @@ export const createPoll = (guildId: string, title: string, description: string |
 //     return true;
 // }
 
-export const pollEditableChange = (guildId: string, pollId: number, editable: boolean):Types.PollData | Types.PollState.NotFund => { // poll作成時に内容を変える用
+export const pollEditableChange = (guildId: string, pollId: number, editable: boolean):Types.PollData | null => { // poll作成時に内容を変える用
     const pollData = getPollData(guildId, pollId);
-    if (!pollData) return Types.PollState.NotFund;
+    if (!pollData) return null;
     pollData.editable = editable;
     dbManager.saveServerDB(guildId);
     return pollData;
@@ -73,12 +97,12 @@ export const updateContents = (guildId: string, pollId: number, contents: string
     return pollData;
 }
 
-// export const checkVoterALL = (guildId: string, pollId: number, userId: string):Types.PollState | boolean => { // 1つでも票がが存在するかどうか
-//     const pollDatas = dbManager.getServerDB(guildId).pollDatas;
-//     if (!pollDatas || !(pollId in pollDatas)) return Types.PollState.NotFund;
-//     if (userId in pollDatas[pollId].voters) return true;
-//     return false;
-// }
+export const checkVoterALL = (guildId: string, pollId: number, userId: string):boolean | Types.PollState.NotFund => { // 1つでも票がが存在するかどうか
+    const pollDatas = dbManager.getServerDB(guildId).pollDatas;
+    if (!pollDatas || !(pollId in pollDatas)) return Types.PollState.NotFund;
+    if (userId in pollDatas[pollId].voters) return true;
+    return false;
+}
 
 // export const checkVoterContent = (guildId: string, pollId: number, userId: string):Types.PollState | boolean => { // 同じ票が存在するかどうか
 //     const pollDatas = dbManager.getServerDB(guildId).pollDatas;
@@ -87,9 +111,9 @@ export const updateContents = (guildId: string, pollId: number, contents: string
 //     return false;
 // }
 
-export const toggleVote = (guildId: string, pollId: number, userId: string, answer: number): Types.PollState | number => {
+export const toggleVote = (guildId: string, pollId: number, userId: string, answer: number):number | null => {
     const pollData = getPollData(guildId, pollId);
-    if (!pollData) return Types.PollState.NotFund;
+    if (!pollData) return null;
     const index = pollData.voters[userId].answer.indexOf(answer);
     if (index == -1) {
         addVote(guildId, pollId, userId, answer);
@@ -99,9 +123,9 @@ export const toggleVote = (guildId: string, pollId: number, userId: string, answ
     return index;
 }
 
-export const addVote = (guildId: string, pollId: number, userId: string, answer: number):Types.PollState | boolean => { // 票の追加
+export const addVote = (guildId: string, pollId: number, userId: string, answer: number):boolean => { // 票の追加
     const pollData = getPollData(guildId, pollId);
-    if (!pollData) return Types.PollState.NotFund;
+    if (!pollData) return false;
     if (!pollData.voters[userId]) pollData.voters[userId] = {
         id: userId,
         answer: []
@@ -111,9 +135,9 @@ export const addVote = (guildId: string, pollId: number, userId: string, answer:
     return true;
 }
 
-export const removeVote = (guildId: string, pollId: number, userId: string, answer: number):Types.PollState | boolean => { // 票の追加
+export const removeVote = (guildId: string, pollId: number, userId: string, answer: number):boolean => { // 票の追加
     const pollData = getPollData(guildId, pollId);
-    if (!pollData) return Types.PollState.NotFund;
+    if (!pollData) return false;
     let index = pollData.voters[userId].answer.indexOf(answer);
 
     if (index == -1) false;
