@@ -126,7 +126,7 @@ client.on("ready", async() => {
 client.once("ready", async () => {
     debugGlobal();
     statusTask();
-    setSlashCommand();
+    // setSlashCommand();
     dbManager.initialize();
 });
 
@@ -139,7 +139,10 @@ client.on("messageCreate", async (message) => {
             if (tc2dm.channelId != message.channel.id) return;
             const user = client.users.cache.get(tc2dm.userId); // ここは高速化のためにキャッシュを使う
             if (!user) return;
-            user.send(message.content);
+            let outText = "";
+            if (message.content != "") outText = outText + message.content + "\n";
+            if (message.attachments.size) message.attachments.map(attachment => outText = outText + attachment.url + "\n")
+            user.send(outText);
         });
     } else { // dm
         Object.keys(dbManager.serverDBs).forEach(async(key) => {
@@ -149,15 +152,24 @@ client.on("messageCreate", async (message) => {
                 if (user.dmChannel?.id != message.channel.id) return;
                 const channel = client.channels.cache.get(tc2dm.channelId); // ここは高速化のためにキャッシュを使う
                 if (!channel || channel.type != Discord.ChannelType.GuildText) return;
-                const embed = new Discord.EmbedBuilder()
-                    .setColor(Types.embedCollar.info)
-                    .setAuthor({
-                        name: user.username,
-                        iconURL: user.avatarURL() ? (user.avatarURL() as string) : undefined
-                    })
-                    .setDescription(message.content)
-                    .setFooter({ text: config.embed.footerText });
-                channel.send({ embeds: [ embed ] });
+                let outText = `\n> **${message.author.username}** より新しいメッセージ\n`;
+                if (message.content != "") outText = outText + message.content + "\n";
+                if (message.attachments.size) message.attachments.map(attachment => outText = outText + attachment.url + "\n")
+                
+                // const embed = new Discord.EmbedBuilder()
+                //     .setColor(Types.embedCollar.info)
+                //     .setAuthor({
+                //         name: user.username,
+                //         iconURL: user.avatarURL() ? (user.avatarURL() as string) : undefined
+                //     })
+                //     .setDescription(message.content)
+                //     .setFooter({ text: config.embed.footerText });
+                // channel.send({
+                //     embeds: [ embed ],
+                //     content: outText 
+                // });
+
+                channel.send({ content: outText });
             });
         });
     }

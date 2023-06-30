@@ -5,7 +5,6 @@ import { config } from "../bot";
 
 export const link = (guildId: string, channelId: string, userId: string): boolean => {
     const serverDB = dbManager.getServerDB(guildId);
-    console.log(serverDB.TC2DM)
     if (serverDB.TC2DM.find( TC2DM => TC2DM.channelId == channelId && TC2DM.userId == userId)) return false;
     serverDB.TC2DM.push({
         channelId: channelId,

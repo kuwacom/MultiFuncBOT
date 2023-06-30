@@ -13,7 +13,8 @@ export const modal = {
 export const executeInteraction = async (interaction: Types.DiscordModalSubmitInteraction) => {
     const [cmd, ...values] = interaction.customId.split(":");    
     const otherAnswerChannelId =  values[0] == "" ? false : values[0];
-    const multiple = values[0] == "true" ? true : false;
+    const multiple = values[1] == "true" ? true : false;
+    console.log(multiple)
 
     const title = interaction.fields.getTextInputValue('title');
     const description = interaction.fields.getTextInputValue('description');

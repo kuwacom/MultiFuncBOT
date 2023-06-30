@@ -46,24 +46,28 @@ export const executeInteraction = async (interaction: Types.DiscordSelectMenuInt
     const answer = Number(interaction.values[0]);
     const userId = interaction.user.id;
 
-    if (!(userId in pollData.voters)) pollData.voters[userId] = {
-        id: userId,
-        answer: []
-    }
-
-    let embed;
-    if (pollManager.checkVoterALL(guildId, pollId, userId)) {
-        embed = new Discord.EmbedBuilder()
-            .setColor(Types.embedCollar.warning)
-            .setTitle(config.emoji.warning + 'すでに投票しています！')
-            .setDescription(
-                'すでに投票をしているため、投票できません！\n'+
-                '現在投票している票を取り消してから行ってください'
-            )
-            .setFooter({ text: config.embed.footerText })
+    let embed; 
+    if (!pollData.multiple && pollManager.checkVoterALL(guildId, pollId, userId)) {
+        if (pollManager.isSameVoterContent(guildId, pollId, userId, answer)) {
+            console.log(pollManager.toggleVote(guildId, pollId, userId, answer))
+            embed = new Discord.EmbedBuilder()
+                .setColor(Types.embedCollar.warning)
+                .setTitle(config.emoji.check + '投票を解除しました...')
+                .setDescription('**' + pollData.contents[answer] + '** への投票を解除しました')
+                .setFooter({ text: config.embed.footerText })    
+        } else {
+            embed = new Discord.EmbedBuilder()
+                .setColor(Types.embedCollar.warning)
+                .setTitle(config.emoji.warning + 'すでに投票しています！')
+                .setDescription(
+                    'すでに投票をしているため、投票できません！\n'+
+                    '現在投票している票を取り消してから行ってください'
+                )
+                .setFooter({ text: config.embed.footerText })
+        }
     } else {
-        let index = pollManager.toggleVote(guildId, pollId, userId, answer);
-        if (index == -1) {
+        const result = pollManager.toggleVote(guildId, pollId, userId, answer);
+        if (result) {
             embed = new Discord.EmbedBuilder()
                 .setColor(Types.embedCollar.success)
                 .setTitle(config.emoji.check + '投票しました！')

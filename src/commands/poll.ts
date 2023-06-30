@@ -3,8 +3,9 @@ import { sleep, slashCommands } from "../modules/utiles";
 import * as pollManager from "../modules/pollManager";
 import * as Types from "../modules/types";
 import * as Error from "../format/error";
+import * as Panel from "../format/panel";
+import * as dbManager from "../modules/dbManager";
 import Discord from "discord.js";
-import { interaction } from "../format/error";
 
 export const command = {
     name: "poll",
@@ -107,7 +108,7 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
 
         await interaction.showModal(modal);
     } else if (subCommand == "delete") {
-        const pollId = interaction.options.getInteger("pollId");
+        const pollId = interaction.options.getInteger("pollid");
         if (!pollId) return;
         const pollData = pollManager.deletePoll(guildId, pollId);
         if (!pollData) {
@@ -133,11 +134,35 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
         if (pollMessageChannel?.type != Discord.ChannelType.GuildText) return;
         const pollMessage = await pollMessageChannel?.messages.fetch(pollData.pollMessage.id);
         pollMessage.edit({
+            embeds: [Panel.PollENDPanelEmbed(pollData)],
             components: []
         });
         
     } else if (subCommand == "list") {
-
+        const serverDB = dbManager.getServerDB(guildId);
+        const fields = Object.keys(serverDB.pollDatas).map((key: any) => {
+            if (serverDB.pollDatas[key].editable) return;
+            return {
+                name: serverDB.pollDatas[key].title,
+                value: 
+                    "pollId: `" + key + "`\n" +
+                    (serverDB.pollDatas[key].description ? "詳細: `" + serverDB.pollDatas[key].description + "`" : ""),
+                    inline: true
+            }
+        }).filter(e => e);
+        if (fields.length == 0) {
+            interaction.reply(Error.interaction.NotfoundPoll);
+            return; 
+        } else {
+            const embed = new Discord.EmbedBuilder()
+                .setColor(Types.embedCollar.success)
+                .setTitle(config.emoji.help + '現在存在するポール')
+                .setFields(fields as [])
+                .setFooter({ text: config.embed.footerText })
+            interaction.reply({
+                embeds: [ embed ]
+            });
+        }
     }
 
 }

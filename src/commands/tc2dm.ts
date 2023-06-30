@@ -1,6 +1,9 @@
 import { logger, config, client } from "../bot";
 import * as Types from "../modules/types";
 import * as TC2DMManager from "../modules/tc2dmManager";
+import * as Error from "../format/error";
+import * as Panel from "../format/panel";
+import * as dbManager from "../modules/dbManager";
 import Discord from "discord.js";
 
 export const command = {
@@ -65,6 +68,11 @@ export const executeMessage = async (message: Discord.Message) => {
 export const executeInteraction = async (interaction: Types.DiscordCommandInteraction) => {
     if (!interaction.guild || !interaction.channel || !interaction.member || !interaction.isChatInputCommand()) return;
     // interactionCommand
+    const guildId = interaction.guildId;
+    if (!guildId) {
+        interaction.reply(Error.interaction.ERROR)
+        return;
+    }
 
     const subCommand = interaction.options.getSubcommand();
 
@@ -117,19 +125,40 @@ export const executeInteraction = async (interaction: Types.DiscordCommandIntera
                 `<@${targetUserId}> < - > <#${targetChannelId}>`
             )
             .setFooter({ text: config.embed.footerText });
+            interaction.reply({
+                embeds: [ embed ],
+                ephemeral: true
+            });
         } else {
-            embed = new Discord.EmbedBuilder()
-            .setColor(Types.embedCollar.error)
-            .setTitle(config.emoji.error + "存在しないリンクです！")
-            .setDescription(
-                "このTCとDMはリンクされていません"
-            )
-            .setFooter({ text: config.embed.footerText });
+            interaction.reply(Error.interaction.NotfoundLink);
+            return;
         }
-        interaction.reply({ embeds: [ embed ] });
-
-        return;
-        
+    } else if (subCommand == "list") {
+        const serverDB = dbManager.getServerDB(guildId);
+        const fields: Discord.RestOrArray<Discord.APIEmbedField> = [];
+        const promise = Object.keys(serverDB.TC2DM).map(async(key: any) => {
+            const user = await client.users.fetch(serverDB.TC2DM[key].userId);
+            fields.push({
+                name: user ? user.username : "存在しないユーザー",
+                value: 
+                    "接続先: <#" + serverDB.TC2DM[key].channelId + ">",
+                    inline: true
+            })
+        })
+        await Promise.all(promise);
+        if (fields.length == 0) {
+            interaction.reply(Error.interaction.NotfoundLink);
+            return;
+        } else {
+            const embed = new Discord.EmbedBuilder()
+                .setColor(Types.embedCollar.success)
+                .setTitle(config.emoji.help + '現在存在するリンク')
+                .setFields(fields)
+                .setFooter({ text: config.embed.footerText })
+            interaction.reply({
+                embeds: [ embed ]
+            });
+        }
     }
 
 }

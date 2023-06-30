@@ -14,7 +14,6 @@ export enum PollState {
 }
 
 export interface Voter {
-    id: string;
     answer: number[];
 }
 
@@ -40,7 +39,6 @@ export interface TC2DM {
 }
 
 export interface ServerDB {
-    id: string;
     pollDatas: {[pollId: number]: PollData};
     TC2DM: TC2DM[];
 }

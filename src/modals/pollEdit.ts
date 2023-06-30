@@ -23,7 +23,7 @@ export const executeInteraction = async (interaction: Types.DiscordModalSubmitIn
         return;
     }
 
-    let pollData = pollManager.updateContents(guildId, pollId, contents);
+    let pollData = pollManager.updatePollContents(guildId, pollId, contents);
     if (!pollData) {
         interaction.reply(Error.interaction.NotfoundPoll);
         return; 

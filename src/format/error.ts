@@ -21,7 +21,23 @@ export const interaction = {
             new Discord.EmbedBuilder()
             .setColor(Types.embedCollar.error)
             .setTitle(config.emoji.error+"ポールが存在しません！")
-            .setDescription("すでにそのポールは終了しているか削除されています")
+            .setDescription(
+                "すでにポールは終了しているか削除されています\n" +
+                "`/poll create` よりポールを作成できます"
+                )
+            .setFooter({ text: config.embed.footerText })
+        ],
+        ephemeral: true
+    } as Discord.InteractionReplyOptions,
+
+    NotfoundLink: {
+        embeds: [
+            new Discord.EmbedBuilder()
+            .setColor(Types.embedCollar.error)
+            .setTitle(config.emoji.error + "存在しないリンクです！")
+            .setDescription(
+                "このTCとDMはリンクされていません"
+            )
             .setFooter({ text: config.embed.footerText })
         ],
         ephemeral: true
@@ -32,7 +48,10 @@ export const interaction = {
             new Discord.EmbedBuilder()
             .setColor(Types.embedCollar.error)
             .setTitle(config.emoji.error+"ポールはすでに作成されています")
-            .setDescription("すでにそのポールは作成されています")
+            .setDescription(
+                "すでにそのポールは作成されています" +
+                "`/poll create` より新しくポールを作成できます"
+                )
             .setFooter({ text: config.embed.footerText })
         ],
         ephemeral: true
